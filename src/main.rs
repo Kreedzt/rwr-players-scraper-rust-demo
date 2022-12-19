@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 use anyhow::Result as AnyhowResult;
 use reqwest;
 use scraper::{Html, Selector};
@@ -30,20 +32,44 @@ fn main() -> AnyhowResult<()> {
     let fragment = Html::parse_fragment(&resp);
     let selector = quick_selector(SELECTOR_MATCH);
 
+    let mut times = 0;
+
+    let mut property_map: Vec<String> = vec![];
+
     for element in fragment.select(&selector) {
         println!("tr element: {:?}", element.value());
+
         for th in element.select(&quick_selector("th")) {
             println!("th element: {:?}", th.value());
 
             for div in th.select(&quick_selector("div")) {
                 let property_name = div.value().classes().into_iter().next().unwrap();
+
                 println!("div element class: {}", property_name);
+
+                property_map.push(property_name.to_string());
             }
         }
 
-        break;
-    }
+        for (index, td) in element.select(&quick_selector("td")).enumerate() {
+            match td.text().next() {
+                Some(t) => {
+                    let key = property_map.iter().nth(index);
+                    println!("td_text: {:?}: {}", key, t);
+                }
+                _ => {
+                    // img
+                }
+            }
+        }
 
+        times = times + 1;
+
+        // Only touch 1 data
+        if times == 2 {
+            break;
+        }
+    }
 
     Ok(())
 }
