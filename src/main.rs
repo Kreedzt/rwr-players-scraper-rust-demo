@@ -6,6 +6,7 @@ use scraper::{Html, Selector};
 
 const TARGET_URL: &str = "http://rwr.runningwithrifles.com/rwr_stats/view_players.php";
 const SELECTOR_MATCH: &str = "table > tbody > tr";
+const PAGE_SIZE: u8 = 100;
 
 fn quick_selector(exp: &str) -> Selector {
     Selector::parse(exp).unwrap()
@@ -17,58 +18,68 @@ fn main() -> AnyhowResult<()> {
 
     let client = reqwest::blocking::Client::new();
 
-    let resp = client
-        .get(TARGET_URL)
-        .query(&[
-            ("db", "invasion"),
-            ("sort", "rank_progression"),
-            ("start", "0"),
-        ])
-        .send()?
-        .text()?;
+    let mut current_start = 0;
 
-    // println!("{:?}", resp);
-    //
-    let fragment = Html::parse_fragment(&resp);
-    let selector = quick_selector(SELECTOR_MATCH);
+    loop {
+        let resp = client
+            .get(TARGET_URL)
+            .query(&[
+                ("db", "invasion"),
+                ("sort", "rank_progression"),
+                ("start", &current_start.to_string()),
+            ])
+            .send()?
+            .text()?;
 
-    let mut times = 0;
+        let fragment = Html::parse_fragment(&resp);
+        let selector = quick_selector(SELECTOR_MATCH);
 
-    let mut property_map: Vec<String> = vec![];
+        let mut property_map: Vec<String> = vec![];
 
-    for element in fragment.select(&selector) {
-        println!("tr element: {:?}", element.value());
+        let mut data_size: i128 = -1;
 
-        for th in element.select(&quick_selector("th")) {
-            println!("th element: {:?}", th.value());
+        for element in fragment.select(&selector) {
+            println!("Start Parsing... start:{}, data(before):{}", current_start, data_size);
+            // println!("tr element: {:?}", element.value());
 
-            for div in th.select(&quick_selector("div")) {
-                let property_name = div.value().classes().into_iter().next().unwrap();
+            // column name
+            for th in element.select(&quick_selector("th")) {
+                // println!("th element: {:?}", th.value());
 
-                println!("div element class: {}", property_name);
+                for div in th.select(&quick_selector("div")) {
+                    let property_name = div.value().classes().into_iter().next().unwrap();
+                    println!("Parsing... column head: {}", property_name);
 
-                property_map.push(property_name.to_string());
-            }
-        }
+                    // println!("div element class: {}", property_name);
 
-        for (index, td) in element.select(&quick_selector("td")).enumerate() {
-            match td.text().next() {
-                Some(t) => {
-                    let key = property_map.iter().nth(index);
-                    println!("td_text: {:?}: {}", key, t);
-                }
-                _ => {
-                    // img
+                    property_map.push(property_name.to_string());
                 }
             }
+
+            // data
+            for (index, td) in element.select(&quick_selector("td")).enumerate() {
+
+                match td.text().next() {
+                    Some(t) => {
+                        let key = property_map.iter().nth(index);
+                        println!("data: {:?}: {}", key, t);
+                    }
+                    _ => {
+                        // img, ignore it
+                    }
+                }
+            }
+
+            data_size = data_size + 1;
         }
 
-        times = times + 1;
+        println!("Parsing completed, start:{}, data(after):{}", current_start, data_size);
 
-        // Only touch 1 data
-        if times == 2 {
+        if data_size < PAGE_SIZE.into() {
             break;
         }
+
+        current_start = current_start + PAGE_SIZE as i128;
     }
 
     Ok(())
