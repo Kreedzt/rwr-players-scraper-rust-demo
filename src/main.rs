@@ -93,3 +93,9 @@ fn main() -> AnyhowResult<()> {
 
     Ok(())
 }
+
+// INSERT INTO rwr (username, kills, deaths, score,time_played,longest_kill_streak,targets_destroyed,soldiers_healed,teamkills,distance_moved,shots_fired,throwables_thrown,rank_progression,rank_name)
+// VALUES('TEST222',0,0,0, 0,0,0,0,0,0.0,0,0,0,'Private')
+
+// INSERT INTO rwr (username, kills, deaths, score,time_played,longest_kill_streak,targets_destroyed,soldiers_healed,teamkills,distance_moved,shots_fired,throwables_thrown,rank_progression,rank_name)
+// VALUES('TEST111',220720,20853,199867, 103128,625,5056,3089,4571,2134.3,2051204,19434,3005651,'General of the Army')
