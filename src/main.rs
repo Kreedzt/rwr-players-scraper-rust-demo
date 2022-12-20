@@ -18,7 +18,10 @@ fn main() -> AnyhowResult<()> {
 
     let client = reqwest::blocking::Client::new();
 
-    let mut current_start = 0;
+    // End: 148900
+    // No data: 149000
+    let mut current_start = 148800;
+    // let mut current_start = 0;
 
     loop {
         let resp = client
@@ -76,6 +79,12 @@ fn main() -> AnyhowResult<()> {
         println!("Parsing completed, start:{}, data(after):{}", current_start, data_size);
 
         if data_size < PAGE_SIZE.into() {
+            println!("Parsing End");
+            if data_size != -1 {
+                println!("Total data: {}", current_start + data_size);
+            } else {
+                println!("Total data: {}", current_start);
+            }
             break;
         }
 
