@@ -125,8 +125,10 @@ fn main() -> AnyhowResult<()> {
 
     // End: 148900
     // No data: 149000
-    // let mut current_start = 148800;
-    let mut current_start = 0;
+    // TODO: Debug
+    let mut current_start = 148800;
+
+    // let mut current_start = 0;
 
     loop {
         let resp = client
@@ -148,7 +150,7 @@ fn main() -> AnyhowResult<()> {
 
         for element in fragment.select(&selector) {
             println!(
-                "Start Parsing... start:{}, data(before):{}",
+                ">>>>>Start Parsing... start:{}, data(before):{}>>>>>",
                 current_start, data_size
             );
             // println!("tr element: {:?}", element.value());
@@ -279,23 +281,24 @@ fn main() -> AnyhowResult<()> {
         }
 
         println!(
-            "Parsing completed, start:{}, data(after):{}",
+            ">>>>>Parsing completed, start:{}, data(after):{}>>>>>",
             current_start, data_size
         );
 
         if data_size < PAGE_SIZE.into() {
-            println!("Parsing End");
+            println!("=====Parsing End=====");
             if data_size != -1 {
-                println!("Total data: {}", current_start + data_size);
+                println!("=====Total data: {}=====", current_start + data_size);
             } else {
-                println!("Total data: {}", current_start);
+                println!("=====Total data: {}=====", current_start);
             }
             break;
         }
 
         current_start = current_start + PAGE_SIZE as i128;
 
-        break;
+        // TODO: Debug only
+        // break;
     }
 
     Ok(())
