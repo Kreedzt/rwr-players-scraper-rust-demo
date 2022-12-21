@@ -126,9 +126,9 @@ fn main() -> AnyhowResult<()> {
     // End: 148900
     // No data: 149000
     // TODO: Debug
-    let mut current_start = 148800;
+    // let mut current_start = 148800;
 
-    // let mut current_start = 0;
+    let mut current_start = 0;
 
     loop {
         let resp = client
